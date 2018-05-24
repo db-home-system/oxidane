@@ -1,0 +1,10 @@
+Output: bom
+Type  : BOM
+From  : Project [oxidane.PrjPcb]
+   Generated File[bom-oxidane.xls]
+
+
+Files Generated   : 1
+Documents Printed : 0
+
+Finished Output Generation At 6:45:46 PM On 5/24/2018
