@@ -5,7 +5,7 @@ Z:\oxidane\Assembly\oxidane\Pick Place for board.txt
 File Design Information:
 
 Date:       24/05/18
-Time:       21:26
+Time:       21:33
 Revision:   Not in VersionControl
 Variant:    No variations
 Units used: mm
