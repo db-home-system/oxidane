@@ -1,16 +1,16 @@
 ------------------------------------------------------------------------------------------
-Gerber File Extension Report For: board.GBR   5/24/2018  9:33:55 PM
+Gerber File Extension Report For: board.GBR   31-May-18  15:01:41
 ------------------------------------------------------------------------------------------
 
 
 ------------------------------------------------------------------------------------------
 Layer Extension     Layer Description                      
 ------------------------------------------------------------------------------------------
-.GTL                Top Layer                               
-.GBL                Bottom Layer                            
 .GTO                Top Overlay                             
 .GTP                Top Paste                               
 .GTS                Top Solder                              
+.GTL                Top Layer                               
+.GBL                Bottom Layer                            
 .GBS                Bottom Solder                           
 .GBP                Bottom Paste                            
 .GBO                Bottom Overlay                          
