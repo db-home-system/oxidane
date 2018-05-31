@@ -3,4 +3,4 @@ Version=1.0
 [Project1]
 ProjectPath=oxidane.PrjPcb
 [Project2]
-ProjectPath=..\..\altium\Libraries\Connectors\Connectors.LibPkg
+ProjectPath=..\programmer\programmer.PrjPcb
