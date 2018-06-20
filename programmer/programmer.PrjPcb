@@ -50,7 +50,7 @@ AnnotateOrder=1
 DoLibraryUpdate=1
 DoDatabaseUpdate=1
 ClassGenCCAutoEnabled=1
-ClassGenCCAutoRoomEnabled=1
+ClassGenCCAutoRoomEnabled=0
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
@@ -67,7 +67,7 @@ AnnotateOrder=0
 DoLibraryUpdate=1
 DoDatabaseUpdate=1
 ClassGenCCAutoEnabled=1
-ClassGenCCAutoRoomEnabled=1
+ClassGenCCAutoRoomEnabled=0
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
@@ -84,7 +84,7 @@ AnnotateOrder=2
 DoLibraryUpdate=1
 DoDatabaseUpdate=1
 ClassGenCCAutoEnabled=1
-ClassGenCCAutoRoomEnabled=1
+ClassGenCCAutoRoomEnabled=0
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
@@ -108,28 +108,28 @@ GenerateClassCluster=0
 DocumentUniqueId=IXEQFWBI
 
 [Parameter1]
-Name=ProjectDate
-Value=30/05/2018
+Name=ProjectTitle
+Value=Rusty
 
 [Parameter2]
-Name=ProjectDescription
-Value=Oxidane module programmer
-
-[Parameter3]
-Name=ProjectLicense
-Value=GPL
-
-[Parameter4]
-Name=ProjectPCBRev
-Value=A
-
-[Parameter5]
 Name=ProjectRevision
 Value=0
 
+[Parameter3]
+Name=ProjectPCBRev
+Value=A
+
+[Parameter4]
+Name=ProjectLicense
+Value=GPL
+
+[Parameter5]
+Name=ProjectDescription
+Value=Oxidane module programmer
+
 [Parameter6]
-Name=ProjectTitle
-Value=Rusty
+Name=ProjectDate
+Value=30/05/2018
 
 [Configuration1]
 Name=Default Configuration
