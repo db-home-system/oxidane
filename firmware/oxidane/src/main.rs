@@ -18,6 +18,11 @@ fn main() -> ! {
 
     unsafe {
         peripherals
+            .RCC
+            .ahbenr
+            .write(|w| w.bits(0b1 << 1));
+
+        peripherals
             .GPIOB
             .moder
             .modify(|r, w| w.bits((r.bits() & !(0b11 << 8)) | (0b01 << 8)));

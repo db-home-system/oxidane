@@ -20,7 +20,7 @@ output="$(mktemp)"
 arm-none-eabi-objcopy -O binary target/thumbv7m-none-eabi/debug/oxidane "$output"
 
 # Flash the .bin file
-stm32flash -w "$output" -v -g 0x0 -b 115200 -R -i -rts,dtr,-dtr:rts,dtr,-dtr $1
+stm32flash -w "$output" -v -b 115200 -R -i -rts,dtr,-dtr:rts,dtr,-dtr $1
 
 # Remove output file
 rm "$output"
