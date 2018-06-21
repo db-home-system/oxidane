@@ -4,31 +4,29 @@
 extern crate cortex_m;
 #[macro_use]
 extern crate cortex_m_rt as rt;
+extern crate embedded_hal;
 extern crate panic_abort;
-extern crate stm32l1;
+extern crate stm32l151_hal as hal;
 
 use cortex_m::asm;
 use rt::ExceptionFrame;
-use stm32l1::stm32l151;
+
+use hal::prelude::*;
+use hal::stm32l151;
 
 entry!(main);
 
 fn main() -> ! {
-    let peripherals = stm32l151::Peripherals::take().unwrap();
+    let p = stm32l151::Peripherals::take().unwrap();
 
-    unsafe {
-        peripherals
-            .RCC
-            .ahbenr
-            .write(|w| w.bits(0b1 << 1));
+    let mut rcc = p.RCC.constrain();
+    let mut gpiob = p.GPIOB.split(&mut rcc.ahb);
 
-        peripherals
-            .GPIOB
-            .moder
-            .modify(|r, w| w.bits((r.bits() & !(0b11 << 8)) | (0b01 << 8)));
+    let mut led = gpiob
+        .pb4
+        .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
-        peripherals.GPIOB.bsrr.write(|w| w.bits(0b1 << 4));
-    }
+    led.set_high();
 
     loop {
         asm::bkpt();
