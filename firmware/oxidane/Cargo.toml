@@ -7,7 +7,6 @@ authors = ["Pietro Lorefice <pietro.lorefice@gmail.com>"]
 cortex-m = "0.5.0"
 cortex-m-rt = "0.5.0"
 panic-abort = "0.2.0"
-nb = "0.1.1"
 
 [dependencies.stm32l1]
 version = "0.2.0"
