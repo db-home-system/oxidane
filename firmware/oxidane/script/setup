@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-# scripts/setup
+# script/setup
 # Perform the required one-time setup of the project, including bootstrapping
 
 set -eu
@@ -9,7 +9,4 @@ cd "$(dirname "$0")/.."
 
 # Dependency bootstrapping
 ./script/bootstrap
-
-# Build project
-cargo +nightly build
 
