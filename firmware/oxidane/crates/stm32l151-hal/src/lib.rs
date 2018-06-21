@@ -18,7 +18,6 @@
 //! [cortex-m-quickstart]: https://docs.rs/cortex-m-quickstart/~0.3
 
 #![deny(missing_docs)]
-#![deny(warnings)]
 #![no_std]
 
 extern crate cast;
@@ -29,3 +28,7 @@ extern crate stm32l1;
 extern crate void;
 
 pub use stm32l1::stm32l151;
+
+pub mod flash;
+pub mod rcc;
+pub mod time;
