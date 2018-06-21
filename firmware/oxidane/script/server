@@ -17,7 +17,7 @@ fi
 
 # Produce the output .bin file to be flashed
 output="$(mktemp)"
-arm-none-eabi-objcopy -O binary target/thumbv7m-none-eabi/debug/oxidane "$output"
+arm-none-eabi-objcopy -O binary target/thumbv7m-none-eabi/release/oxidane "$output"
 
 # Flash the .bin file
 stm32flash -w "$output" -v -b 115200 -R -i -rts,dtr,-dtr:rts,dtr,-dtr $1

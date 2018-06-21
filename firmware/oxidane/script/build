@@ -8,5 +8,5 @@ set -eu
 cd "$(dirname "$0")/.."
 
 # Build Rust project
-cargo +nightly build
+cargo +nightly build --release
 
