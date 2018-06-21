@@ -31,5 +31,6 @@ pub use stm32l1::stm32l151;
 
 pub mod flash;
 pub mod gpio;
+pub mod prelude;
 pub mod rcc;
 pub mod time;
