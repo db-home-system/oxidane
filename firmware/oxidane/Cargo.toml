@@ -1,0 +1,19 @@
+[package]
+name = "oxidane"
+version = "0.1.0"
+authors = ["Pietro Lorefice <pietro.lorefice@gmail.com>"]
+
+[dependencies]
+cortex-m = "0.5.0"
+cortex-m-rt = "0.5.0"
+panic-abort = "0.2.0"
+nb = "0.1.1"
+
+[dependencies.stm32l1]
+version = "0.2.0"
+features = ["stm32l151", "rt"]
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"
