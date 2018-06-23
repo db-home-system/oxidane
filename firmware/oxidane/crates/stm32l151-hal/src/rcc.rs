@@ -6,7 +6,7 @@ use cast::u32;
 use stm32l151::{rcc, RCC};
 
 use flash::ACR;
-use time::Hertz;
+use time::{Hertz, U32Ext};
 
 /// Extension trait that constrains the `RCC` peripheral
 pub trait RccExt {
@@ -143,13 +143,15 @@ impl CFGR {
     /// Freezes the clock configuration, making it effective
     pub fn freeze(self, acr: &mut ACR) -> Clocks {
         /* TODO: implement me! */
+        let sysclk = 2_097_000.hz();
+
         Clocks {
-            hclk: Hertz(self.hclk.unwrap()),
-            pclk1: Hertz(self.pclk1.unwrap()),
-            pclk2: Hertz(self.pclk2.unwrap()),
-            ppre1: 0.into(),
-            ppre2: 0.into(),
-            sysclk: Hertz(self.sysclk.unwrap()),
+            hclk: sysclk,
+            pclk1: sysclk,
+            pclk2: sysclk,
+            ppre1: 0,
+            ppre2: 0,
+            sysclk,
         }
     }
 }
