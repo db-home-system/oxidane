@@ -29,6 +29,7 @@ extern crate void;
 
 pub use stm32l1::stm32l151;
 
+pub mod delay;
 pub mod flash;
 pub mod gpio;
 pub mod prelude;
