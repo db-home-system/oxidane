@@ -12,6 +12,7 @@ extern crate stm32l151_hal as hal;
 
 use rt::ExceptionFrame;
 
+use hal::delay::Delay;
 use hal::prelude::*;
 use hal::serial::Serial;
 use hal::stm32l151;
@@ -20,10 +21,13 @@ entry!(main);
 
 fn main() -> ! {
     let p = stm32l151::Peripherals::take().unwrap();
+    let cp = cortex_m::Peripherals::take().unwrap();
 
     let mut flash = p.FLASH.constrain();
     let mut rcc = p.RCC.constrain();
     let clocks = rcc.cfgr.freeze(&mut flash.acr);
+
+    let mut delay = Delay::new(cp.SYST, clocks);
 
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb);
     let mut gpiob = p.GPIOB.split(&mut rcc.ahb);
@@ -38,12 +42,15 @@ fn main() -> ! {
     let uart = Serial::usart1(p.USART1, (tx, rx), 9_600.bps(), clocks, &mut rcc.apb2);
     let (mut tx, _) = uart.split();
 
-    led.set_high();
-
     loop {
         for &c in b"Hello Rust!\n" {
             block!(tx.write(c)).ok();
         }
+
+        led.set_high();
+        delay.delay_ms(1000_u16);
+        led.set_low();
+        delay.delay_ms(1000_u16);
     }
 }
 
