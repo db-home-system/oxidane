@@ -93,6 +93,7 @@ impl APB2 {
     }
 }
 
+const MSI: u32 = 2_097_000; // Hz
 const HSI: u32 = 8_000_000; // Hz
 
 /// Clock configuration
@@ -143,7 +144,7 @@ impl CFGR {
     /// Freezes the clock configuration, making it effective
     pub fn freeze(self, acr: &mut ACR) -> Clocks {
         /* TODO: implement me! */
-        let sysclk = 2_097_000.hz();
+        let sysclk = MSI.hz();
 
         Clocks {
             hclk: sysclk,
