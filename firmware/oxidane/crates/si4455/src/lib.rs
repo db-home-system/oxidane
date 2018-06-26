@@ -30,22 +30,8 @@ where
     {
         let mut si4455 = Si4455 { spi, ncs, sdn };
 
-        /* Radio reset sequence [AN692, §4.4] */
-
-        /* Reset the device */
-        si4455.sdn.set_high();
-        delay.delay_ms(1);
-        si4455.sdn.set_low();
-
-        /* Wait for POR */
-        delay.delay_ms(5);
-        si4455.wait_for_cts()?;
-
-        /* Send POWER_UP (black magic) sequence */
-        si4455.transfer(
-            &[Command::POWER_UP as u8, 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80],
-            &mut [0],
-        )?;
+        /* Perform the initial reset */
+        si4455.reset(delay)?;
 
         Ok(si4455)
     }
@@ -87,6 +73,29 @@ where
                 | (resp[9] as u32) << 8
                 | resp[10] as u32,
         })
+    }
+
+    /// Resets the radio to its initial state [AN692, §4.4]
+    fn reset<D>(&mut self, delay: &mut D) -> Result<(), E>
+    where
+        D: DelayMs<u8>,
+    {
+        /* Reset the device */
+        self.sdn.set_high();
+        delay.delay_ms(1);
+        self.sdn.set_low();
+
+        /* Wait for POR */
+        delay.delay_ms(5);
+        self.wait_for_cts()?;
+
+        /* Send POWER_UP (black magic) sequence */
+        self.transfer(
+            &[Command::POWER_UP as u8, 0x01, 0x00, 0x01, 0xC9, 0xC3, 0x80],
+            &mut [0],
+        )?;
+
+        Ok(())
     }
 
     /// Blocks until the radio is ready to receive a new command.
