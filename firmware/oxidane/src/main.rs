@@ -94,7 +94,7 @@ fn main() -> ! {
     loop {
         let info = si4455.get_part_info().unwrap();
 
-        write!(&mut log, "PART_INFO: {:X?}\n", info).ok();
+        write!(&mut log, "{:X?}\n", info).ok();
 
         led.toggle();
         delay.delay_ms(1000_u16);

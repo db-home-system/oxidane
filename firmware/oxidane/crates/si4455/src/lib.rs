@@ -3,6 +3,9 @@
 extern crate embedded_hal as hal;
 extern crate generic_array;
 
+mod defs;
+pub use defs::*;
+
 use hal::blocking::delay::DelayMs;
 use hal::blocking::spi;
 use hal::digital::OutputPin;
@@ -45,12 +48,21 @@ where
     }
 
     /// Obtains information about the chip.
-    pub fn get_part_info(&mut self) -> Result<[u8; 9], E> {
+    pub fn get_part_info(&mut self) -> Result<PartInfo, E> {
         let cmd = [Command::PART_INFO as u8];
         let mut resp = [0; 9];
 
         self.transfer(&cmd, &mut resp)?;
-        Ok(resp)
+
+        Ok(PartInfo {
+            revision: resp[0],
+            part: (resp[1] as u16) << 8 | resp[2] as u16,
+            builder: resp[3],
+            id: (resp[4] as u16) << 8 | resp[5] as u16,
+            customer: resp[6],
+            rom_id: resp[7],
+            bond: resp[8],
+        })
     }
 
     /// Blocks until the radio is ready to receive a new command.
