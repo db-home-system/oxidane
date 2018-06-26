@@ -8,14 +8,21 @@ extern crate embedded_hal;
 extern crate panic_abort;
 #[macro_use]
 extern crate nb;
+extern crate si4455;
 extern crate stm32l151_hal as hal;
 
-use rt::ExceptionFrame;
+mod log;
+
+use core::fmt::Write;
 
 use hal::delay::Delay;
 use hal::prelude::*;
 use hal::serial::Serial;
+use hal::spi::Spi;
 use hal::stm32l151;
+use log::Logger;
+use rt::ExceptionFrame;
+use si4455::Si4455;
 
 entry!(main);
 
@@ -32,24 +39,64 @@ fn main() -> ! {
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb);
     let mut gpiob = p.GPIOB.split(&mut rcc.ahb);
 
-    let tx = gpioa.pa9.into_af7(&mut gpioa.moder, &mut gpioa.afrh);
-    let rx = gpioa.pa10.into_af7(&mut gpioa.moder, &mut gpioa.afrh);
-
+    /* Debug LED */
     let mut led = gpiob
         .pb4
         .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
-    let uart = Serial::usart1(p.USART1, (tx, rx), 9_600.bps(), clocks, &mut rcc.apb2);
-    let (mut tx, _) = uart.split();
+    /* Debug UART */
+    let mut log = {
+        let tx = gpioa.pa9.into_af7(&mut gpioa.moder, &mut gpioa.afrh);
+        let rx = gpioa.pa10.into_af7(&mut gpioa.moder, &mut gpioa.afrh);
+
+        let uart = Serial::usart1(p.USART1, (tx, rx), 115_200.bps(), clocks, &mut rcc.apb2);
+        let (tx, _) = uart.split();
+
+        Logger::new(tx)
+    };
+
+    /* Si4455 */
+    let mut si4455 = {
+        /* SPI pins */
+        let sck = gpioa.pa5.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+        let miso = gpioa.pa6.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+        let mosi = gpioa.pa7.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+
+        /* Chip select */
+        let mut nss = gpioa
+            .pa4
+            .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+
+        /* Shutdown pin */
+        let mut sdn = gpiob
+            .pb10
+            .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
+
+        let mut ven_rf = gpiob
+            .pb11
+            .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
+
+        /* Power up the Si4455 */
+        ven_rf.set_low();
+
+        let mut spi = Spi::spi1(
+            p.SPI1,
+            (sck, miso, mosi),
+            si4455::MODE,
+            1.mhz(),
+            clocks,
+            &mut rcc.apb2,
+        );
+
+        Si4455::new(spi, nss, sdn, &mut delay).unwrap()
+    };
 
     loop {
-        for &c in b"Hello Rust!\n" {
-            block!(tx.write(c)).ok();
-        }
+        let info = si4455.get_part_info().unwrap();
 
-        led.set_high();
-        delay.delay_ms(1000_u16);
-        led.set_low();
+        write!(&mut log, "PART_INFO: {:X?}\n", info).ok();
+
+        led.toggle();
         delay.delay_ms(1000_u16);
     }
 }
