@@ -5,3 +5,4 @@ authors = ["Pietro Lorefice <pietro.lorefice@gmail.com>"]
 
 [dependencies]
 embedded-hal = "0.2.0"
+generic-array = "0.11.1"
