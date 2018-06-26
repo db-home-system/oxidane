@@ -30,12 +30,15 @@ where
     {
         let mut si4455 = Si4455 { spi, ncs, sdn };
 
+        /* Radio reset sequence [AN692, §4.4] */
+
         /* Reset the device */
         si4455.sdn.set_high();
         delay.delay_ms(1);
         si4455.sdn.set_low();
 
-        /* Poll until ready */
+        /* Wait for POR */
+        delay.delay_ms(5);
         si4455.wait_for_cts()?;
 
         /* Send POWER_UP (black magic) sequence */
