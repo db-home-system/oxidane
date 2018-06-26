@@ -92,9 +92,11 @@ fn main() -> ! {
     };
 
     loop {
-        let info = si4455.get_part_info().unwrap();
+        let part = si4455.get_part_info().unwrap();
+        let func = si4455.get_func_info().unwrap();
 
-        write!(&mut log, "{:X?}\n", info).ok();
+        write!(&mut log, "{:X?}\n", part).ok();
+        write!(&mut log, "{:X?}\n", func).ok();
 
         led.toggle();
         delay.delay_ms(1000_u16);
