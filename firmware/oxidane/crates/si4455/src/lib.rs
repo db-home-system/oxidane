@@ -23,7 +23,7 @@ where
     NCS: OutputPin,
     SDN: OutputPin,
 {
-    /// Creates a new instance of the radio device
+    /// Creates a new instance of the radio device.
     pub fn new<D>(spi: SPI, ncs: NCS, sdn: SDN, delay: &mut D) -> Result<Si4455<SPI, NCS, SDN>, E>
     where
         D: DelayMs<u8>,
@@ -47,7 +47,7 @@ where
         Ok(si4455)
     }
 
-    /// Obtains information about the chip.
+    /// Reports basic information about the device.
     pub fn get_part_info(&mut self) -> Result<PartInfo, E> {
         let cmd = [Command::PART_INFO as u8];
         let mut resp = [0; 9];
@@ -62,6 +62,27 @@ where
             customer: resp[6],
             rom_id: resp[7],
             bond: resp[8],
+        })
+    }
+
+    /// Reports function revision information about the device.
+    pub fn get_func_info(&mut self) -> Result<FuncInfo, E> {
+        let cmd = [Command::FUNC_INFO as u8];
+        let mut resp = [0; 11];
+
+        self.transfer(&cmd, &mut resp)?;
+
+        Ok(FuncInfo {
+            rev_ext: resp[0],
+            rev_branch: resp[1],
+            rev_int: resp[2],
+            patch: (resp[3] as u16) << 8 | resp[4] as u16,
+            func: resp[5],
+            svn_flags: resp[6],
+            svn_rev: (resp[7] as u32) << 24
+                | (resp[8] as u32) << 16
+                | (resp[9] as u32) << 8
+                | resp[10] as u32,
         })
     }
 
@@ -124,5 +145,6 @@ const CTS_READY: u8 = 0xFF;
 enum Command {
     PART_INFO = 0x01,
     POWER_UP = 0x02,
+    FUNC_INFO = 0x10,
     READ_CMD_BUFF = 0x44,
 }
