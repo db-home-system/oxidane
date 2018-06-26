@@ -5,8 +5,11 @@ authors = ["Pietro Lorefice <pietro@develer.com>"]
 
 [dependencies]
 cortex-m = "0.5.0"
-embedded-hal = "0.2.0"
 nb = "0.1.0"
+
+[dependencies.embedded-hal]
+features = ["unproven"]
+version = "0.2.1"
 
 [dependencies.stm32l1]
 features = ["stm32l151"]
