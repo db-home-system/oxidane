@@ -88,8 +88,8 @@ where
 
     /// Blocks until the radio is ready to receive a new command.
     fn wait_for_cts(&mut self) -> Result<(), E> {
-        // Send a dummy command and wait for the response, it means the radio is ready
-        self.read(&mut [0_u8])
+        // Send a NOP command and wait for the response, it means the radio is ready
+        self.read(&mut [Command::NOP as u8])
     }
 
     /// Low-level method to send a buffer to the radio.
@@ -143,6 +143,7 @@ const CTS_READY: u8 = 0xFF;
 // Radio commands
 #[allow(non_camel_case_types)]
 enum Command {
+    NOP = 0x00,
     PART_INFO = 0x01,
     POWER_UP = 0x02,
     FUNC_INFO = 0x10,
