@@ -104,15 +104,18 @@ fn main() -> ! {
         ).unwrap()
     };
 
+    si4455.listen(0, 0).unwrap();
+
     loop {
         let part = si4455.get_part_info().unwrap();
         let func = si4455.get_func_info().unwrap();
 
-        write!(&mut log, "{:X?}\n", part).ok();
-        write!(&mut log, "{:X?}\n", func).ok();
+        write!(&mut log, "Sending...").ok();
+        si4455.transmit(0, b"Hello Rust!\n").unwrap();
+        write!(&mut log, "done!\n").ok();
 
         led.toggle();
-        delay.delay_ms(1000_u16);
+        //delay.delay_ms(1000_u16);
     }
 }
 

@@ -34,3 +34,10 @@ pub struct IntStatus {
     pub chip_pending: u8,
     pub chip_status: u8,
 }
+
+/// Device status
+#[derive(Debug, Clone, Copy)]
+pub struct DeviceState {
+    pub state: u8,
+    pub channel: u8,
+}
