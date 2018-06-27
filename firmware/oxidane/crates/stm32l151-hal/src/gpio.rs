@@ -94,7 +94,7 @@ macro_rules! gpio {
         pub mod $gpiox {
             use core::marker::PhantomData;
 
-            use hal::digital::{OutputPin, StatefulOutputPin};
+            use hal::digital::{InputPin, OutputPin, StatefulOutputPin};
             use hal::digital::toggleable;
             use stm32l151::{$gpioy, $GPIOX};
 
@@ -202,6 +202,18 @@ macro_rules! gpio {
             pub struct $PXx<MODE> {
                 i: u8,
                 _mode: PhantomData<MODE>,
+            }
+
+            impl<MODE> InputPin for $PXx<Input<MODE>> {
+                fn is_high(&self) -> bool {
+                    // NOTE(unsafe) atomic read with no side effects
+                    unsafe { (*$GPIOX::ptr()).idr.read().bits() & (1 << self.i) != 0 }
+                }
+
+                fn is_low(&self) -> bool {
+                    // NOTE(unsafe) atomic read with no side effects
+                    unsafe { (*$GPIOX::ptr()).idr.read().bits() & (1 << self.i) == 0 }
+                }
             }
 
             impl<MODE> OutputPin for $PXx<Output<MODE>> {
@@ -465,6 +477,18 @@ macro_rules! gpio {
                             i: $i,
                             _mode: self._mode,
                         }
+                    }
+                }
+
+                impl<MODE> InputPin for $PXi<Input<MODE>> {
+                    fn is_high(&self) -> bool {
+                        // NOTE(unsafe) atomic read with no side effects
+                        unsafe { (*$GPIOX::ptr()).idr.read().bits() & (1 << $i) != 0 }
+                    }
+
+                    fn is_low(&self) -> bool {
+                        // NOTE(unsafe) atomic read with no side effects
+                        unsafe { (*$GPIOX::ptr()).idr.read().bits() & (1 << $i) == 0 }
                     }
                 }
 
