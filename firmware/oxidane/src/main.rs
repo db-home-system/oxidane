@@ -12,6 +12,7 @@ extern crate si4455;
 extern crate stm32l151_hal as hal;
 
 mod log;
+mod radio_config;
 
 use core::fmt::Write;
 
@@ -38,6 +39,7 @@ fn main() -> ! {
 
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb);
     let mut gpiob = p.GPIOB.split(&mut rcc.ahb);
+    let gpioc = p.GPIOC.split(&mut rcc.ahb);
 
     /* Debug LED */
     let mut led = gpiob
@@ -72,6 +74,10 @@ fn main() -> ! {
             .pb10
             .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
+        /* Interrupt pin */
+        let mut nirq = gpioc.pc13;
+
+        /* Vcc enable switch for RF */
         let mut ven_rf = gpiob
             .pb11
             .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
@@ -88,7 +94,14 @@ fn main() -> ! {
             &mut rcc.apb2,
         );
 
-        Si4455::new(spi, nss, sdn, &mut delay).unwrap()
+        Si4455::new(
+            spi,
+            nss,
+            sdn,
+            nirq,
+            &mut delay,
+            &radio_config::SI4455_CONFIG,
+        ).unwrap()
     };
 
     loop {

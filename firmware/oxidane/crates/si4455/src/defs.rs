@@ -21,3 +21,16 @@ pub struct FuncInfo {
     pub svn_flags: u8,
     pub svn_rev: u32,
 }
+
+/// Interrupt status
+#[derive(Debug, Clone, Copy)]
+pub struct IntStatus {
+    pub int_pending: u8,
+    pub int_status: u8,
+    pub ph_pending: u8,
+    pub ph_status: u8,
+    pub modem_pending: u8,
+    pub modem_status: u8,
+    pub chip_pending: u8,
+    pub chip_status: u8,
+}
