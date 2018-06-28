@@ -1,12 +1,10 @@
 //! Reset and Clock Control
 
-use core::cmp;
-
 use cast::u32;
-use stm32l151::{rcc, RCC};
+use stm32l151::{rcc, PWR, RCC};
 
 use flash::ACR;
-use time::{Hertz, U32Ext};
+use time::Hertz;
 
 /// Extension trait that constrains the `RCC` peripheral
 pub trait RccExt {
@@ -93,8 +91,10 @@ impl APB2 {
     }
 }
 
-const MSI: u32 = 2_097_000; // Hz
-const HSI: u32 = 8_000_000; // Hz
+const HSI: u32 = 16_000_000; // Hz
+
+const PLLMULS: [u32; 9] = [3, 4, 6, 8, 12, 16, 24, 32, 48];
+const PLLDIVS: [u32; 3] = [2, 3, 4];
 
 /// Clock configuration
 pub struct CFGR {
@@ -143,16 +143,133 @@ impl CFGR {
 
     /// Freezes the clock configuration, making it effective
     pub fn freeze(self, acr: &mut ACR) -> Clocks {
-        /* TODO: implement me! */
-        let sysclk = MSI.hz();
+        let rcc = unsafe { &*RCC::ptr() };
+        let pwr = unsafe { &*PWR::ptr() };
+
+        // These defaults allow to achieve maximum clock frequency
+        let sysclk = self.sysclk.unwrap_or(2 * HSI);
+        let mut pllmul = 6;
+        let mut plldiv = 3;
+
+        // Find a multiplier and divider that match the target clock
+        if HSI * pllmul / plldiv != sysclk {
+            'outer: for &m in &PLLMULS {
+                for &d in &PLLDIVS {
+                    if HSI * m / d == sysclk {
+                        pllmul = m;
+                        plldiv = d;
+                        break 'outer;
+                    }
+                }
+            }
+        }
+
+        let pllmul_bits = PLLMULS
+            .iter()
+            .enumerate()
+            .find(|(_, &val)| val == pllmul)
+            .unwrap()
+            .0 as u8;
+
+        let plldiv_bits = plldiv as u8 - 1;
+
+        let sysclk = HSI * pllmul / plldiv;
+        assert!(sysclk <= 32_000_000);
+
+        // AHB and core clock scaling
+        let hpre_bits: u8 = match sysclk / self.hclk.unwrap_or(sysclk) {
+            0 => unreachable!(),
+            1 => 0b0111,
+            2 => 0b1000,
+            3...5 => 0b1001,
+            6...11 => 0b1010,
+            12...39 => 0b1011,
+            40...95 => 0b1100,
+            96...191 => 0b1101,
+            192...383 => 0b1110,
+            _ => 0b1111,
+        };
+
+        let hclk = sysclk / (1 << (hpre_bits - 0b0111));
+        assert!(hclk <= 32_000_000);
+
+        // APB1 clock scaling
+        let ppre1_bits: u8 = match hclk / self.pclk1.unwrap_or(hclk) {
+            0 => unreachable!(),
+            1 => 0b011,
+            2 => 0b100,
+            3...5 => 0b101,
+            6...11 => 0b110,
+            _ => 0b111,
+        };
+
+        let ppre1 = 1 << (ppre1_bits - 0b011);
+        let pclk1 = hclk / u32(ppre1);
+        assert!(pclk1 <= 32_000_000);
+
+        // APB2 clock scaling
+        let ppre2_bits: u8 = match hclk / self.pclk2.unwrap_or(hclk) {
+            0 => unreachable!(),
+            1 => 0b011,
+            2 => 0b100,
+            3...5 => 0b101,
+            6...11 => 0b110,
+            _ => 0b111,
+        };
+
+        let ppre2 = 1 << (ppre2_bits - 0b011);
+        let pclk2 = hclk / u32(ppre2);
+        assert!(pclk2 <= 32_000_000);
+
+        // Configure voltage range 1 (required to set clock to 32MHz)
+        rcc.apb1enr.modify(|_, w| w.pwren().set_bit());
+        pwr.cr.modify(|_, w| unsafe { w.vos().bits(0b01) });
+        while !pwr.csr.read().vosf().bit_is_clear() {}
+
+        // Configure FLASH before enabling PLL: 64-bit access, prefetch, 1 WS
+        acr.acr().modify(|_, w| w.acc64().set_bit());
+        acr.acr().modify(|_, w| w.prften().set_bit());
+        acr.acr().modify(|_, w| w.latency().bit(hclk > 16_000_000));
+        while acr.acr().read().latency().bit() != (hclk > 16_000_000) {}
+
+        // Wait for HSI startup and trim it to factory values
+        rcc.cr.modify(|_, w| w.hsion().set_bit());
+        while !rcc.cr.read().hsirdy().bit_is_set() {}
+        rcc.icscr.modify(|_, w| unsafe { w.hsitrim().bits(16) });
+
+        // Configure PLL values
+        rcc.cfgr.modify(|_, w| unsafe {
+            w.pllmul()
+                .bits(pllmul_bits)
+                .plldiv()
+                .bits(plldiv_bits)
+                .pllsrc()
+                .clear_bit()
+        });
+
+        // Wait for PLL startup
+        rcc.cr.modify(|_, w| w.pllon().set_bit());
+        while !rcc.cr.read().pllrdy().bit_is_set() {}
+
+        // SW: PLL selected as system clock
+        rcc.cfgr.modify(|_, w| unsafe {
+            w.ppre2()
+                .bits(ppre2_bits)
+                .ppre1()
+                .bits(ppre1_bits)
+                .hpre()
+                .bits(hpre_bits)
+                .sw()
+                .bits(0b11)
+        });
 
         Clocks {
-            hclk: sysclk,
-            pclk1: sysclk,
-            pclk2: sysclk,
-            ppre1: 0,
-            ppre2: 0,
-            sysclk,
+            hclk: Hertz(hclk),
+            pclk1: Hertz(pclk1),
+            pclk2: Hertz(pclk2),
+            ppre1,
+            ppre2,
+            sysclk: Hertz(sysclk),
         }
     }
 }
@@ -165,6 +282,8 @@ pub struct Clocks {
     hclk: Hertz,
     pclk1: Hertz,
     pclk2: Hertz,
+    // TODO remove `allow`
+    #[allow(dead_code)]
     ppre1: u8,
     // TODO remove `allow`
     #[allow(dead_code)]
@@ -188,6 +307,8 @@ impl Clocks {
         self.pclk2
     }
 
+    // TODO remove `allow`
+    #[allow(dead_code)]
     pub(crate) fn ppre1(&self) -> u8 {
         self.ppre1
     }
