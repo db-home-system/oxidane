@@ -149,6 +149,8 @@ macro_rules! gpio {
             }
 
             impl AFRL {
+                // NOTE(dead_code) required since GPIOC does not have PIN0-7
+                #[allow(dead_code)]
                 pub(crate) fn afr(&mut self) -> &$gpioy::AFRL {
                     unsafe { &(*$GPIOX::ptr()).afrl }
                 }
