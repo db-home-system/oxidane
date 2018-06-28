@@ -33,7 +33,7 @@ fn main() -> ! {
 
     let mut flash = p.FLASH.constrain();
     let mut rcc = p.RCC.constrain();
-    let clocks = rcc.cfgr.freeze(&mut flash.acr);
+    let clocks = rcc.cfgr.sysclk(32.mhz()).freeze(&mut flash.acr);
 
     let mut delay = Delay::new(cp.SYST, clocks);
 
