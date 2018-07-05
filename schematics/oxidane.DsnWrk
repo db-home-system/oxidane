@@ -1,6 +1,6 @@
 [ProjectGroup]
 Version=1.0
 [Project1]
-ProjectPath=oxidane.PrjPcb
+ProjectPath=board\oxidane.PrjPcb
 [Project2]
-ProjectPath=..\programmer\programmer.PrjPcb
+ProjectPath=programmer\programmer.PrjPcb
