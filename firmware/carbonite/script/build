@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# script/build
+# Perform the steps required to build the project
+
+set -eu
+
+cd "$(dirname "$0")/.."
+
+# Build project
+make $@
+

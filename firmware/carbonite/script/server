@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# script/server
+# Flash the firmware on the board and run it
+
+set -eu
+
+cd "$(dirname "$0")/.."
+
+if [ $# -lt 1 ]; then
+	echo "Usage: script/server SERIAL"
+	exit 1
+fi
+
+# Build the project first
+./script/build
+
+# Flash the .bin file
+stm32flash -w "build/carbonite.bin" -v -b 115200 -R -i -rts,dtr,-dtr:rts,dtr,-dtr $1
+
