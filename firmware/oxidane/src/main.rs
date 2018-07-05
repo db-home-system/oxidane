@@ -18,6 +18,7 @@ use core::fmt::Write;
 
 use hal::delay::Delay;
 use hal::prelude::*;
+use hal::rcc::{AHBPrescaler, APBPrescaler, PllDivider, PllMultiplier, PllSource, SystemClock};
 use hal::serial::Serial;
 use hal::spi::Spi;
 use hal::stm32l151;
@@ -33,7 +34,16 @@ fn main() -> ! {
 
     let mut flash = p.FLASH.constrain();
     let mut rcc = p.RCC.constrain();
-    let clocks = rcc.cfgr.sysclk(32.mhz()).freeze(&mut flash.acr);
+
+    let clocks = rcc
+        .cfgr
+        .set_clock(
+            SystemClock::PLL(PllSource::HSI, PllMultiplier::X6, PllDivider::Div3),
+            AHBPrescaler::Div1,
+            APBPrescaler::Div2,
+            APBPrescaler::Div2,
+        )
+        .freeze(&mut flash.acr);
 
     let mut delay = Delay::new(cp.SYST, clocks);
 
