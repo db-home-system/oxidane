@@ -49,7 +49,7 @@ fn main() -> ! {
 
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb);
     let mut gpiob = p.GPIOB.split(&mut rcc.ahb);
-    let gpioc = p.GPIOC.split(&mut rcc.ahb);
+    let mut gpioc = p.GPIOC.split(&mut rcc.ahb);
 
     /* Debug LED */
     let mut led = gpiob
@@ -70,9 +70,18 @@ fn main() -> ! {
     /* Si4455 */
     let mut si4455 = {
         /* SPI pins */
-        let sck = gpioa.pa5.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
-        let miso = gpioa.pa6.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
-        let mosi = gpioa.pa7.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+        let sck = gpioa
+            .pa5
+            .into_pull_down_input(&mut gpioa.moder, &mut gpioa.pupdr)
+            .into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+        let miso = gpioa
+            .pa6
+            .into_pull_up_input(&mut gpioa.moder, &mut gpioa.pupdr)
+            .into_af5(&mut gpioa.moder, &mut gpioa.afrl);
+        let mosi = gpioa
+            .pa7
+            .into_pull_up_input(&mut gpioa.moder, &mut gpioa.pupdr)
+            .into_af5(&mut gpioa.moder, &mut gpioa.afrl);
 
         /* Chip select */
         let mut nss = gpioa
@@ -85,7 +94,9 @@ fn main() -> ! {
             .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
         /* Interrupt pin */
-        let mut nirq = gpioc.pc13;
+        let mut nirq = gpioc
+            .pc13
+            .into_pull_up_input(&mut gpioc.moder, &mut gpioc.pupdr);
 
         /* Vcc enable switch for RF */
         let mut ven_rf = gpiob
@@ -111,21 +122,24 @@ fn main() -> ! {
             nirq,
             &mut delay,
             &radio_config::SI4455_CONFIG,
-        ).unwrap()
+        )
     };
 
-    si4455.listen(0, 0).unwrap();
+    if !si4455.begin(0, 17) {
+        loop {
+            led.toggle();
+            delay.delay_ms(50_u16);
+        }
+    }
 
     loop {
-        let part = si4455.get_part_info().unwrap();
-        let func = si4455.get_func_info().unwrap();
-
         write!(&mut log, "Sending...").ok();
-        si4455.transmit(0, b"Hello Rust!\n").unwrap();
         write!(&mut log, "done!\n").ok();
 
         led.toggle();
-        //delay.delay_ms(1000_u16);
+        for _ in [0; 10].iter() {
+            delay.delay_ms(100_u16);
+        }
     }
 }
 
