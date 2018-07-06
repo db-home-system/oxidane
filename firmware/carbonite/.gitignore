@@ -1,2 +1,9 @@
 # Build artifacts
 /build/
+
+# Configurations
+.codelite/
+.vscode/
+*.project
+*.workspace
+
