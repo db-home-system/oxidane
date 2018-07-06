@@ -249,13 +249,7 @@ static void MX_USART1_UART_Init(void)
 	}
 }
 
-/** Configure pins as 
-
-     PA0   ------> SharedAnalog_PA0
-     PA1   ------> SharedAnalog_PA1
-     PA2   ------> SharedAnalog_PA2
-     PA3   ------> SharedAnalog_PA3
-*/
+/* Configure GPIO pins */
 static void MX_GPIO_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
@@ -267,7 +261,7 @@ static void MX_GPIO_Init(void)
 
 	HAL_GPIO_WritePin(SI4455_CS_GPIO_Port, SI4455_CS_Pin, GPIO_PIN_SET);
 
-	HAL_GPIO_WritePin(GPIOB, SI4455_SDN_Pin | VEN_I2C_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, SI4455_SDN_Pin | VEN_I2C_Pin | HEARTBEAT_LED_Pin, GPIO_PIN_RESET);
 
 	HAL_GPIO_WritePin(GPIOB, VEN_RF_Pin | VEN_EXT_Pin, GPIO_PIN_SET);
 
@@ -292,12 +286,15 @@ static void MX_GPIO_Init(void)
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-	GPIO_InitStruct.Pin = SI4455_SDN_Pin | VEN_RF_Pin | VEN_I2C_Pin | VEN_EXT_Pin;
+	GPIO_InitStruct.Pin = SI4455_SDN_Pin
+						| VEN_RF_Pin
+						| VEN_I2C_Pin
+						| VEN_EXT_Pin
+						| HEARTBEAT_LED_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 }
 
 /* StartHeartbeatTask function */
@@ -305,7 +302,9 @@ static void StartHeartbeatTask(void const * argument)
 {
 	/* Task loop */
 	for (;;) {
-		osDelay(1);
+		HAL_GPIO_TogglePin(HEARTBEAT_LED_GPIO_Port, HEARTBEAT_LED_Pin);
+
+		osDelay(500);
 	}
 }
 
@@ -345,7 +344,7 @@ void _Error_Handler(char *file, int line)
   * @retval None
   */
 void assert_failed(uint8_t* file, uint32_t line)
-{ 
+{
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 }

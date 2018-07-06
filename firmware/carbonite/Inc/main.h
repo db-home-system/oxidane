@@ -35,6 +35,8 @@
 #define DBG_RX_GPIO_Port GPIOA
 #define VEN_EXT_Pin GPIO_PIN_3
 #define VEN_EXT_GPIO_Port GPIOB
+#define HEARTBEAT_LED_Pin GPIO_PIN_4
+#define HEARTBEAT_LED_GPIO_Port GPIOB
 
 /**
   * @brief Uncomment the line below to expanse the "assert_param" macro in the
