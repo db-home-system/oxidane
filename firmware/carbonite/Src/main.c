@@ -9,8 +9,9 @@ static SPI_HandleTypeDef hspi1;
 static UART_HandleTypeDef huart1;
 
 static osThreadId HeartbeatTaskHandle;
-static uint32_t HeartbeatTaskBuffer[ 64 ];
+static uint32_t HeartbeatTaskBuffer[64];
 static osStaticThreadDef_t HeartbeatTaskControlBlock;
+
 static osMutexId DefaultMutexHandle;
 static osStaticMutexDef_t DefaultMutexControlBlock;
 
@@ -45,7 +46,8 @@ int main(void)
 	MX_SPI1_Init();
 	MX_USART1_UART_Init();
 	MX_I2C1_Init();
-	MX_RTC_Init();
+	/* FIXME: LSE not working! */
+	/* MX_RTC_Init(); */
 
 	/* Create the mutex(es) */
 	osMutexStaticDef(DefaultMutex, &DefaultMutexControlBlock);
@@ -81,8 +83,8 @@ static void SystemClock_Config(void)
 	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
 	/* Initializes the CPU, AHB and APB busses clocks */
-	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE;
-	RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI /* | RCC_OSCILLATORTYPE_LSE */;
+	/* RCC_OscInitStruct.LSEState = RCC_LSE_ON; */
 	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
 	RCC_OscInitStruct.HSICalibrationValue = 16;
 	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -111,13 +113,16 @@ static void SystemClock_Config(void)
 		_Error_Handler(__FILE__, __LINE__);
 	}
 
+	/* FIXME: LSE not working! */
+#if 0
 	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
 	PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
 
 	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
 	{
-		_Error_Handler(__FILE__, __LINE__);
+	        _Error_Handler(__FILE__, __LINE__);
 	}
+#endif
 
 	/* Configure the Systick interrupt time */
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
