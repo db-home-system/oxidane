@@ -10,3 +10,6 @@ cd "$(dirname "$0")/.."
 # Dependency bootstrapping
 ./script/bootstrap
 
+# Build Docker container
+docker build -t carbonite .
+

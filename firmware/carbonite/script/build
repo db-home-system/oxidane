@@ -8,5 +8,5 @@ set -eu
 cd "$(dirname "$0")/.."
 
 # Build project
-make $@
+docker run --rm -tiv $(pwd):/carbonite carbonite
 

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# script/console
+# Open a shell on the build container
+
+set -eu
+
+cd "$(dirname "$0")/.."
+
+# Run build
+docker run --rm -tiv $(pwd):/carbonite carbonite /bin/bash
+

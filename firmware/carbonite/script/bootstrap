@@ -13,14 +13,9 @@ check_installed()
 	[ -n "$(command -v $1)" ] && return 0 || return 1
 }
 
-# Toolchain and build tools
-if ! check_installed arm-none-eabi-gcc; then
-	echo "ARM GCC toolchain missing!"
-	exit 1
-fi
-
-if ! check_installed make; then
-	echo "make missing!"
+# Docker as build environment
+if ! check_installed docker; then
+	echo "Docker missing!"
 	exit 1
 fi
 
