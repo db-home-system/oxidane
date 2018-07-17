@@ -228,7 +228,9 @@ static enum CommandResult initialize(struct Si4455 *s, const uint8_t* configArra
         }
 
         uint8_t radioCmd[16];
-        for (uint8_t col = 0; col < cmdBytesCount; col++) {
+        uint8_t col;
+
+        for (col = 0; col < cmdBytesCount; col++) {
             radioCmd[col] = *configArray;
             configArray++;
         }
