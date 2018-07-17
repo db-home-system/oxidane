@@ -23,7 +23,8 @@ BIN = $(CP) -O binary -S
 C_SOURCES =  \
 	Src/main.c \
 	Src/freertos.c \
-	Src/si4455.c\
+	Src/si4455.c \
+	Src/radio.c \
 	Src/stm32l1xx_it.c \
 	Src/stm32l1xx_hal_msp.c \
 	Src/stm32l1xx_hal_timebase_TIM.c \

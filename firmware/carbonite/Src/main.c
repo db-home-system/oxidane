@@ -1,6 +1,7 @@
 #include "main.h"
 #include "stm32l1xx_hal.h"
 #include "cmsis_os.h"
+#include "radio.h"
 
 static ADC_HandleTypeDef hadc;
 static I2C_HandleTypeDef hi2c1;
@@ -11,6 +12,10 @@ static UART_HandleTypeDef huart1;
 static osThreadId HeartbeatTaskHandle;
 static uint32_t HeartbeatTaskBuffer[64];
 static osStaticThreadDef_t HeartbeatTaskControlBlock;
+
+static osThreadId RadioTaskHandle;
+static uint32_t RadioTaskBuffer[64];
+static osStaticThreadDef_t RadioTaskControlBlock;
 
 static osMutexId DefaultMutexHandle;
 static osStaticMutexDef_t DefaultMutexControlBlock;
@@ -26,6 +31,7 @@ static void MX_RTC_Init(void);
 
 /* Task creation functions */
 static void StartHeartbeatTask(void const * argument);
+static void StartRadioTask(void const * argument);
 
 /**
   * @brief  The application entry point.
@@ -55,9 +61,13 @@ int main(void)
 
 	/* Create the thread(s) */
 	osThreadStaticDef(HeartbeatTask, StartHeartbeatTask, osPriorityLow, 0, 64,
-	HeartbeatTaskBuffer, &HeartbeatTaskControlBlock);
+		HeartbeatTaskBuffer, &HeartbeatTaskControlBlock);
+
+	osThreadStaticDef(RadioTask, StartRadioTask, osPriorityNormal, 0, 64,
+		RadioTaskBuffer, &RadioTaskControlBlock);
 
 	HeartbeatTaskHandle = osThreadCreate(osThread(HeartbeatTask), NULL);
+	RadioTaskHandle = osThreadCreate(osThread(RadioTask), NULL);
 
 	/* Start scheduler */
 	osKernelStart();
@@ -310,6 +320,25 @@ static void StartHeartbeatTask(void const * argument)
 		HAL_GPIO_TogglePin(HEARTBEAT_LED_GPIO_Port, HEARTBEAT_LED_Pin);
 
 		osDelay(500);
+	}
+}
+
+/* StartRadioTask function */
+static void StartRadioTask(void const * argument)
+{
+	uint8_t data[32] = { 0 };
+
+	/* Enable power to the RF circuit */
+	HAL_GPIO_WritePin(VEN_RF_GPIO_Port, VEN_RF_Pin, GPIO_PIN_RESET);
+
+	if (!radio_init(&hspi1))
+		_Error_Handler(__FILE__, __LINE__);
+
+	/* Task loop */
+	for (;;) {
+		radio_transmit(data, sizeof(data) / sizeof(uint8_t));
+
+		osDelay(100);
 	}
 }
 
