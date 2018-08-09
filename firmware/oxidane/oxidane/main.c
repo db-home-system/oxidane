@@ -37,9 +37,17 @@
  */
 
 #include "hw/hw_led.h"
-#include <cpu/irq.h>
+
 #include <cfg/debug.h>
+
+#include <drv/i2c.h>
+#include <drv/spi.h>
 #include <drv/timer.h>
+
+#include <cpu/irq.h>
+
+static I2c i2c;
+static Spi spi;
 
 static void init(void)
 {
@@ -47,6 +55,9 @@ static void init(void)
 	LED_INIT();
 	kdbg_init();
 	timer_init();
+
+	spi_init(&spi, SPI1, 1500000);
+	i2c_init(&i2c, I2C1, CONFIG_I2C_FREQ);
 }
 
 int main(void)
