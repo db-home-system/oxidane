@@ -39,8 +39,7 @@
  *
  * \return non zero = error code
  */
-uint8_t
-ow_reset(void)
+uint8_t ow_reset(void)
 {
 	return ow_reset_intern();
 }
@@ -51,8 +50,7 @@ ow_reset(void)
 *
 * \return true if busy, false if not
 */
-bool
-ow_busy(void)
+bool ow_busy(void)
 {
 	return ow_bit_io(1) ? false : true;
 }
@@ -63,8 +61,7 @@ ow_busy(void)
  * \param b bit to output
  * \return bit read from I/O
  */
-uint8_t
-ow_bit_io(uint8_t b)
+uint8_t ow_bit_io(uint8_t b)
 {
 	return ow_bit_io_intern(b & 1, 0);
 }
@@ -75,8 +72,7 @@ ow_bit_io(uint8_t b)
  * \param b byte to output
  * \return byte read from I/O
  */
-uint8_t
-ow_byte_wr(uint8_t b)
+uint8_t ow_byte_wr(uint8_t b)
 {
 	uint8_t i = 8, j;
 
@@ -100,8 +96,7 @@ ow_byte_wr(uint8_t b)
  * \param b byte to output
  * \return byte read from I/O
  */
-uint8_t
-ow_byte_wr_with_parasite_enable(uint8_t b)
+uint8_t ow_byte_wr_with_parasite_enable(uint8_t b)
 {
 	uint8_t i = 8, j;
 
@@ -132,8 +127,7 @@ ow_byte_wr_with_parasite_enable(uint8_t b)
  *
  * \return byte read from I/O
  */
-uint8_t
-ow_byte_rd(void)
+uint8_t ow_byte_rd(void)
 {
 	// read by sending only "1"s, so bus gets released
 	// after the init low-pulse in every slot
@@ -148,8 +142,7 @@ ow_byte_rd(void)
  * \param id pointer to 8 octet id buffer
  * \return next search path dirction
  */
-uint8_t
-ow_rom_search(uint8_t diff, uint8_t * id)
+uint8_t ow_rom_search(uint8_t diff, uint8_t * id)
 {
 	uint8_t i, j, next_diff;
 	uint8_t b;
@@ -204,9 +197,7 @@ ow_rom_search(uint8_t diff, uint8_t * id)
 				// store bit
 				*id |= 0x80;
 			}
-
 			i--;
-
 		}
 		while (--j);
 
@@ -228,8 +219,7 @@ ow_rom_search(uint8_t diff, uint8_t * id)
  * \param id pointer to 8 octet id buffer of device to send to
  * \param with_parasite_enable flag to indicate whether parasitic mode to be used
  */
-static void
-ow_command_intern(uint8_t command, uint8_t * id, uint8_t with_parasite_enable)
+static void ow_command_intern(uint8_t command, uint8_t * id, uint8_t with_parasite_enable)
 {
 	uint8_t i;
 
@@ -269,8 +259,7 @@ ow_command_intern(uint8_t command, uint8_t * id, uint8_t with_parasite_enable)
  * \param command byte to output to device
  * \param id pointer to 8 octet id buffer of device to send to
  */
-void
-ow_command(uint8_t command, uint8_t * id)
+void ow_command(uint8_t command, uint8_t * id)
 {
 	ow_command_intern(command, id, 0);
 }
@@ -281,8 +270,7 @@ ow_command(uint8_t command, uint8_t * id)
  * \param command byte to output to device
  * \param id pointer to 8 octet id buffer of device to send to
  */
-void
-ow_command_with_parasite_enable(uint8_t command, uint8_t * id)
+void ow_command_with_parasite_enable(uint8_t command, uint8_t * id)
 {
 	ow_command_intern(command, id, 1);
 }
@@ -294,8 +282,7 @@ ow_command_with_parasite_enable(uint8_t command, uint8_t * id)
  * \param buff buffer to output to device
  * \param len length of data to send
  */
-void
-ow_block(uint8_t * buff, uint8_t len)
+void ow_block(uint8_t * buff, uint8_t len)
 {
 	uint8_t i;
 
@@ -303,3 +290,4 @@ ow_block(uint8_t * buff, uint8_t len)
 		buff[i] = ow_byte_wr(buff[i]);
 
 }
+

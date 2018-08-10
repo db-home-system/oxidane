@@ -55,41 +55,41 @@
 
 #define OW_ROMCODE_SIZE 8        ///< rom-code (serial number) size including Family & CRC
 
-	/**
-	 * \defgroup 1wire_api 1-wire API
-	 * This is the interface to the low level bit-bang driver
-	 * Initialisation is only required if more that 1 I/O line is being used for multiple busses
-	 *
-	 * It is expected that the only interface to this code is to search for devices and to define the bus
-	 * if multiple busses are in use.
-	 *
-	 * API usage example:
-	 * \code
-	 * uint8_t ids[4][OW_ROMCODE_SIZE];      // only expect to find 3 actually!!
-	 *
-	 * for (diff = OW_SEARCH_FIRST, cnt = 0; diff != OW_LAST_DEVICE; cnt++)
-	 * {
-	 * 	diff = ow_rom_search (diff, ids[cnt]);
-	 *
-	 * 	if ((diff == OW_PRESENCE_ERR) || (diff == OW_DATA_ERR))
-	 * 		break;	// <--- early exit!
-	 * 	if (crc8 (ids[cnt], 8))
-	 * 		kfile_print(&ser.fd, "CRC suspect\r\n");
-	 *
-	 * 	switch (ids[cnt][0])
-	 * 	{
-	 * 	case SBATTERY_FAM:
-	 * 	// note which device is of this type
-	 * 		break;
-	 * 	case DS18S20_FAMILY_CODE:
-	 * 	case DS18B20_FAMILY_CODE:
-	 * 	case DS1822_FAMILY_CODE:
-	 * 		break;
-	 * 	}
-	 * }
-	 * \endcode
-	 * \{
-	 */
+/**
+ * \defgroup 1wire_api 1-wire API
+ * This is the interface to the low level bit-bang driver
+ * Initialisation is only required if more that 1 I/O line is being used for multiple busses
+ *
+ * It is expected that the only interface to this code is to search for devices and to define the bus
+ * if multiple busses are in use.
+ *
+ * API usage example:
+ * \code
+ * uint8_t ids[4][OW_ROMCODE_SIZE];      // only expect to find 3 actually!!
+ *
+ * for (diff = OW_SEARCH_FIRST, cnt = 0; diff != OW_LAST_DEVICE; cnt++)
+ * {
+ * 	diff = ow_rom_search (diff, ids[cnt]);
+ *
+ * 	if ((diff == OW_PRESENCE_ERR) || (diff == OW_DATA_ERR))
+ * 		break;	// <--- early exit!
+ * 	if (crc8 (ids[cnt], 8))
+ * 		kfile_print(&ser.fd, "CRC suspect\r\n");
+ *
+ * 	switch (ids[cnt][0])
+ * 	{
+ * 	case SBATTERY_FAM:
+ * 	// note which device is of this type
+ * 		break;
+ * 	case DS18S20_FAMILY_CODE:
+ * 	case DS18B20_FAMILY_CODE:
+ * 	case DS1822_FAMILY_CODE:
+ * 		break;
+ * 	}
+ * }
+ * \endcode
+ * \{
+ */
 
 uint8_t ow_reset(void);
 bool ow_busy(void);
@@ -106,10 +106,9 @@ uint8_t ow_byte_wr_with_parasite_enable(uint8_t b);
 
 void ow_block(uint8_t * buff, uint8_t len);
 
-
 void ow_set_bus(volatile uint8_t * in, volatile uint8_t * out, volatile uint8_t * ddr, uint8_t pin);
 
-	/** \} */ //defgroup 1wire_api
+/** \} */ //defgroup 1wire_api
 
 /** \} */ //defgroup ow_driver
 

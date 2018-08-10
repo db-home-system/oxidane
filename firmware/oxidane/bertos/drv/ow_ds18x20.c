@@ -36,7 +36,6 @@
 #include <stdbool.h>
 
 
-
 /** Start measurement (CONVERT_T) for all sensors if input id is NULL 
  *   or for single sensor where id is the rom-code
  *
@@ -44,8 +43,7 @@
  * \param id The address of the device.
  * \return true if OK, false if error
  */
-bool
-ow_ds18X20_start(uint8_t id[], bool parasitic)
+bool ow_ds18X20_start(uint8_t id[], bool parasitic)
 {
 	bool ret = false;
 
@@ -72,8 +70,7 @@ ow_ds18X20_start(uint8_t id[], bool parasitic)
 * \param id The address of the device.
 * \return true if OK, false if error
 */
-bool
-ow_ds18x20_resolution(uint8_t id[], uint8_t bits)
+bool ow_ds18x20_resolution(uint8_t id[], uint8_t bits)
 {
 	bool ret = true;
 
@@ -111,8 +108,7 @@ ow_ds18x20_resolution(uint8_t id[], uint8_t bits)
 * \param id The address of the device.
 * \return true if OK, false if error
 */
-static bool
-read_scratchpad(uint8_t id[], uint8_t sp[])
+static bool read_scratchpad(uint8_t id[], uint8_t sp[])
 {
 	uint8_t i;
 
@@ -138,8 +134,7 @@ read_scratchpad(uint8_t id[], uint8_t sp[])
 * \param id The address of the device.
 * \return true if OK, false if error
 */
-bool
-ow_ds18X20_read_temperature(uint8_t id[], int16_t * temperature)
+bool ow_ds18X20_read_temperature(uint8_t id[], int16_t * temperature)
 {
 	uint8_t sp[10];
 	uint8_t bits;
@@ -175,5 +170,7 @@ ow_ds18X20_read_temperature(uint8_t id[], int16_t * temperature)
 		// whereas the x20 has 9 bits so shift by 1
 		*temperature = tmp >> shift;
 	}
+
 	return ret;
 }
+
