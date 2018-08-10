@@ -39,7 +39,6 @@
 #ifndef HW_SPI_H
 #define HW_SPI_H
 
-#include "cfg/cfg_galleggiante.h"
 #include <cfg/macros.h>
 
 #include <io/stm32.h>
@@ -62,8 +61,8 @@
 
 
 
-#define SPI_HW_SS_ACTIVE()    stm32_gpioPinWrite(CS_GPIO_BASE, CS, 0)
-#define SPI_HW_SS_INACTIVE()  stm32_gpioPinWrite(CS_GPIO_BASE, CS, 1)
+#define SPI_HW_SS_ACTIVE()    stm32_gpioPinWrite(GPIO_BASE, CS, 0)
+#define SPI_HW_SS_INACTIVE()  stm32_gpioPinWrite(GPIO_BASE, CS, 1)
 
 #define SPI_HW_SCK_ACTIVE()   GPIO_BASE->BSRR  |= SCK
 #define SPI_HW_SCK_INACTIVE() GPIO_BASE->BRR |= SCK
@@ -78,10 +77,10 @@
 		/* Enable clocking on GPIOA */ \
 		((struct RCC *)RCC_BASE)->AHBENR |= RCC_AHBENR_GPIOAEN; \
 		((struct RCC *)RCC_BASE)->AHBENR |= RCC_AHBENR_GPIOBEN; \
-		stm32_gpioPinConfig(CS_GPIO_BASE, CS, GPIO_MODE_OUT_PP, GPIO_SPEED_50MHZ); \
+		stm32_gpioPinConfig(GPIO_BASE, CS, GPIO_MODE_OUT_PP, GPIO_SPEED_50MHZ); \
 		stm32_gpioPinConfig(GPIO_BASE, MISO, GPIO_MODE_IN_FLOATING, GPIO_SPEED_50MHZ); \
 		stm32_gpioPinConfig(GPIO_BASE, SCK | MOSI, GPIO_MODE_OUT_PP, GPIO_SPEED_50MHZ); \
-		stm32_gpioPinWrite(CS_GPIO_BASE, CS, 1); \
+		stm32_gpioPinWrite(GPIO_BASE, CS, 1); \
 	} while(0)
 
 
@@ -90,8 +89,8 @@
 		/* Enable clocking on GPIOA */ \
 		((struct RCC *)RCC_BASE)->AHBENR |= RCC_AHBENR_GPIOAEN; \
 		((struct RCC *)RCC_BASE)->AHBENR |= RCC_AHBENR_GPIOBEN; \
-		stm32_gpioPinConfig(CS_GPIO_BASE, CS, GPIO_MODE_OUT_PP, GPIO_SPEED_50MHZ); \
-		stm32_gpioPinWrite(CS_GPIO_BASE, CS, 1); \
+		stm32_gpioPinConfig(GPIO_BASE, CS, GPIO_MODE_OUT_PP, GPIO_SPEED_50MHZ); \
+		stm32_gpioPinWrite(GPIO_BASE, CS, 1); \
 	} while(0)
 
 #endif /* HW_SPI_H */
