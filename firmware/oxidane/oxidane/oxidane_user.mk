@@ -10,6 +10,8 @@ oxidane_PROGRAMMER_PORT = none
 # Files included by the user.
 oxidane_USER_CSRC = \
 	$(oxidane_SRC_PATH)/main.c \
+	bertos/drv/ow_ds18x20.c \
+	bertos/algo/crc8.c \
 	#
 
 # Files included by the user.
