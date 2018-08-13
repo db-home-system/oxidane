@@ -62,47 +62,12 @@
  */
 // Use AVR's internal pull-up resistor instead of external 4,7k resistor.
 // Based on information from Sascha Schade. Experimental but worked in tests
-// with one DS18B20 and one DS18S20 on a rather short bus (60cm), where both 
+// with one DS18B20 and one DS18S20 on a rather short bus (60cm), where both
 // sensores have been parasite-powered.
 #define OW_USE_INTERNAL_PULLUP     1    /* 0=external, 1=internal */
 
 /**
- *  1-wire data direction port.
- *
- * $WIZ$ type = "enum"
- * $WIZ$ value_list = "onewire_ddr_list"
- */
-#define OW_DDR  DDRB
-
-
-/**
- *  1-wire data pin
- *
- * $WIZ$ type = "enum"
- * $WIZ$ value_list = "onewire_pin_list"
- */
-#define OW_PIN  PB0
-
-
-/**
- *  1-wire input port
- *
- * $WIZ$ type = "enum"
- * $WIZ$ value_list = "onewire_portin_list"
- */
-#define OW_IN   PINB
-
-/**
- *  1-wire output port
- *
- * $WIZ$ type = "enum"
- * $WIZ$ value_list = "onewire_portout_list"
- */
-#define OW_OUT  PORTB
-
-
-/**
- * Recovery time (T_Rec) minimum 1usec - increase for long lines 
+ * Recovery time (T_Rec) minimum 1usec - increase for long lines
  * 5 usecs is a value give in some Maxim AppNotes
  * 30u secs seem to be reliable for longer lines
  *

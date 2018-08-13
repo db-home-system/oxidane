@@ -29,21 +29,38 @@
  */
 
 #include "ow_1wire.h"
-
-// this pulls in the low level implementation from the hardware directory
 #include "hw/hw_1wire.h"
 
 
 /**
  * Reset the bus, disable parasitic mode
  *
+ * To reset all devices, the master should put low the bus for
+ * 450us minimun, and then wait 15-60us to check reply of device that should
+ * put high the bus
+ *
  * \return non zero = error code
  */
-uint8_t ow_reset(void)
+int ow_reset(void)
 {
-	return ow_reset_intern();
-}
+	// Check if bus is free (high)
+	ticks_t start = timer_clock();
+	do {
+		if (timer_clock() - start > ms_to_ticks(100))
+			return OW_BUS_ERR;
+	} while (ow_hw_pin_status());
 
+	OW_HW_PIN_ACTIVE();
+	timer_udelay(480);
+	ow_hw_pin_status();
+	timer_udelay(80);
+	// ready to read the slave reply
+	int ret = ow_hw_pin_status();
+	// Wait to complete the cycle
+	timer_delay(400);
+
+	return ret;
+}
 
 /**
 * Check for 1-wire bus being busy

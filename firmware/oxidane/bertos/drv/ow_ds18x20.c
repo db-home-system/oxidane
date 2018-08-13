@@ -28,12 +28,9 @@
 
 #include "ow_ds18x20.h"
 
-#include "drv/ow_1wire.h"
-
-
+#include <cpu/types.h>
+#include <drv/ow_1wire.h>
 #include <algo/crc8.h>
-#include <stdint.h>
-#include <stdbool.h>
 
 
 /** Start measurement (CONVERT_T) for all sensors if input id is NULL 

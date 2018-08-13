@@ -35,84 +35,82 @@
  * $WIZ$ module_name = "hw_1wire"
  */
 
-#ifndef HW_1WIRE_H_
-#define HW_1WIRE_H_
-
-#include <stdint.h>
+#ifndef HW_1WIRE_H
+#define HW_1WIRE_H
 
 #include "cfg/cfg_arch.h"
-#include "cfg/compiler.h"
+#include <cfg/compiler.h>
+#include <cfg/macros.h>
 
-#warning TODO:This is an example implementation, you must implement it!
+#include <cpu/types.h>
+#include <io/stm32.h>
 
-	/**
-	 * \defgroup 1wirehw_api Hardware API
-	 * Access to this low level driver is mostly from the device specific layer. However, some functions - especially the 
-	 * ow_set_bus() function operates at the lowest level.
-	 *
-	 * This functionality is especially useful when devices are hardwired and so removes the need to scan them for their addresses.
-	 *
-	 * API usage example:
-	 * \code
-	 * switch (sensor)
-	 * {
-	 * case SENSOR_LOW:
-	 *    // low level sensor (ground) on PE4
-	 *    ow_set_bus (&PINE, &PORTE, &DDRE, PE4);
-	 *    if (!ow_busy ())                 // see if the conversion is complete
-	 *    {
-	 *       ow_ds18X20_read_temperature (NULL, &temperature_low);       // read the result
-	 *       ow_ds18X20_start (NULL, false]);            // start the conversion process again
-	 *    }
-	 *    break;
-	 * case SENSOR_HIGH:
-	 *    // high level (roof) sensor on PE5
-	 *    ow_set_bus (&PINE, &PORTE, &DDRE, PE5);
-	 *    if (!ow_busy ())                 // see if the conversion is complete
-	 *    {
-	 *       ow_ds18X20_read_temperature (NULL, &temperature_hi);       // read the result
-	 *       ow_ds18X20_start (NULL, false);            // start the conversion process again
-	 *    }
-	 *    break;
-	 * \endcode
-	 * \{
-	 */
+#include <drv/gpio_stm32.h>
+#include <drv/clock_stm32.h>
+#include <drv/timer.h>
 
 /**
- * Get the state of an input pin
+ * \defgroup 1wirehw_api Hardware API
+ * Access to this low level driver is mostly from the device specific layer. However,
+ * some functions - especially the ow_set_bus() function operates at the lowest level.
  *
- * \return I/O pin value
+ * This functionality is especially useful when devices are hardwired and so removes
+ * the need to scan them for their addresses.
+ *
+ * API usage example:
+ * \code
+ * switch (sensor)
+ * {
+ * case SENSOR_LOW:
+ *    // low level sensor (ground) on PE4
+ *    ow_set_bus (&PINE, &PORTE, &DDRE, PE4);
+ *    if (!ow_busy ())                 // see if the conversion is complete
+ *    {
+ *       ow_ds18X20_read_temperature (NULL, &temperature_low);       // read the result
+ *       ow_ds18X20_start (NULL, false]);            // start the conversion process again
+ *    }
+ *    break;
+ * case SENSOR_HIGH:
+ *    // high level (roof) sensor on PE5
+ *    ow_set_bus (&PINE, &PORTE, &DDRE, PE5);
+ *    if (!ow_busy ())                 // see if the conversion is complete
+ *    {
+ *       ow_ds18X20_read_temperature (NULL, &temperature_hi);       // read the result
+ *       ow_ds18X20_start (NULL, false);            // start the conversion process again
+ *    }
+ *    break;
+ * \endcode
+ * \{
  */
-INLINE uint8_t ow_input_pin_state (void)
+
+#define OW_PIN   BV(4) //PB4
+
+#define GPIO_BASE       ((struct stm32_gpio *)GPIOB_BASE)
+
+#define OW_HW_PIN_ACTIVE()  \
+	do { \
+		stm32_gpioPinConfig(GPIO_BASE, OW_PIN, GPIO_MODE_OUT_PP, GPIO_SPEED_50MHZ); \
+		stm32_gpioPinWrite(GPIO_BASE, OW_PIN, 0); \
+	} while(0)
+
+#define OW_HW_PIN_INACTIVE()  \
+	do { \
+		stm32_gpioPinConfig(GPIO_BASE, OW_PIN, GPIO_MODE_OUT_PP, GPIO_SPEED_50MHZ); \
+		stm32_gpioPinWrite(GPIO_BASE, OW_PIN, 1); \
+	} while(0)
+
+
+INLINE bool ow_hw_pin_status(void)
 {
-	return 0;
+	stm32_gpioPinConfig(GPIO_BASE, OW_PIN, GPIO_MODE_IN_FLOATING, GPIO_SPEED_50MHZ);
+	return (bool)stm32_gpioPinRead(GPIO_BASE, OW_PIN);
 }
 
 /**
  * Enable parasitic mode (set line high to power device)
- *
  */
-INLINE void ow_parasite_enable (void)
-{
-}
-
-/**
- * Disable parasitic mode
- *
- */
-INLINE void ow_parasite_disable (void)
-{
-}
-
-/**
- * Reset the bus, disable parasitic mode
- *
- * \return non zero = error code
- */
-INLINE uint8_t ow_reset_intern (void)
-{
-	return 0;
-}
+#define OW_HW_PARASITE_ENABLE()
+#define OW_HW_PARASITE_DISABLE()
 
 /**
  * Function to output a bit
@@ -121,32 +119,37 @@ INLINE uint8_t ow_reset_intern (void)
  * \param with_parasite_enable flag to indicate leave the data line active high
  * \return bit read from I/O
  */
-INLINE uint8_t ow_bit_io_intern (uint8_t b, uint8_t with_parasite_enable)
+INLINE uint8_t ow_bit_io_intern(uint8_t b, uint8_t with_parasite_enable)
 {
-	(void) (b);
-   (void) (with_parasite_enable);
+	(void)with_parasite_enable;
+	if (b) {
+		OW_HW_PIN_ACTIVE();
+		timer_udelay(10);
+		OW_HW_PIN_INACTIVE();
+		timer_udelay(55);
+	} else {
+		OW_HW_PIN_ACTIVE();
+		timer_udelay(65);
+		OW_HW_PIN_INACTIVE();
+		timer_udelay(5);
+	}
+
 	return 0;
 }
 
 
 /**
- * Set the port/data direction input pin dynamically
- *
- * \param in input port
- * \param out output port
- * \param ddr data direction register
- * \param pin I/O pin (bit number on port)
- *
+ * Init One Wire pin port
  */
-void ow_set_bus (volatile uint8_t * in, volatile uint8_t * out, volatile uint8_t * ddr, uint8_t pin)
-{
-	(void) in;
-	(void) out;
-	(void) ddr;
-	(void) pin;
-}
+#define OW_HW_INIT() \
+	do { \
+		/* Enable clocking on GPIOB */ \
+		((struct RCC *)RCC_BASE)->AHBENR |= RCC_AHBENR_GPIOBEN; \
+		stm32_gpioPinConfig(GPIO_BASE, OW_PIN, GPIO_MODE_OUT_PP, GPIO_SPEED_50MHZ); \
+		stm32_gpioPinWrite(GPIO_BASE, CS, 1); \
+	} while(0)
 
-	/** \} */ //defgroup 1wirehw_api
+/** \} */ //defgroup 1wirehw_api
 
 /** \} */ //addtogroup ow_driver
 

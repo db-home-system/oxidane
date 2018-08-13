@@ -55,6 +55,9 @@
 
 #define OW_ROMCODE_SIZE 8        ///< rom-code (serial number) size including Family & CRC
 
+
+#define OW_BUS_ERR   -1
+
 /**
  * \defgroup 1wire_api 1-wire API
  * This is the interface to the low level bit-bang driver
@@ -91,7 +94,7 @@
  * \{
  */
 
-uint8_t ow_reset(void);
+int ow_reset(void);
 bool ow_busy(void);
 
 uint8_t ow_bit_io(uint8_t b);
@@ -111,29 +114,5 @@ void ow_set_bus(volatile uint8_t * in, volatile uint8_t * out, volatile uint8_t 
 /** \} */ //defgroup 1wire_api
 
 /** \} */ //defgroup ow_driver
-
-/**
- * \name Data direction register
- *
- * $WIZ$ onewire_ddr_list = "DDRB", "DDRD"
- */
-
-/**
- * \name One-wire I/O pin.
- *
- * $WIZ$ onewire_pin_list = "PD0", "PD1", "PD2", "PD3", "PD4", "PD5", "PD6", "PD7", "PB0", "PB1", "PB2", "PB3", "PB4", "PB5"
- */
-
-/**
- * \name One-wire input port
- *
- * $WIZ$ onewire_portin_list = "PINB", "PIND"
- */
-
-/**
- * \name One-wire output port
- *
- * $WIZ$ onewire_portout_list = "PORTB", "PORTD"
- */
 
 #endif /* OW_1WIRE_H_ */
