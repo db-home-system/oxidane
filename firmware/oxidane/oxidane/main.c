@@ -43,11 +43,14 @@
 #include <drv/i2c.h>
 #include <drv/spi.h>
 #include <drv/timer.h>
+#include <drv/ow_1wire.h>
+#include <drv/ow_ds18x20.h>
 
 #include <cpu/irq.h>
 
 static I2c i2c;
 static Spi spi;
+static uint8_t ids[3];
 
 static void init(void)
 {
@@ -63,12 +66,20 @@ static void init(void)
 int main(void)
 {
 	init();
+	ow_ds18x20_resolution(ids, 12);
+
 	while (1)
 	{
-		kputs("Hello world!\n");
-		LED_ON();
-		timer_delay(500);
-		LED_OFF();
+		kprintf("Reset[%d]\n", ow_reset());
+
+		//ow_ds18X20_start(ids, false);
+		//while(ow_busy())
+		//	cpu_relax();
+
+		//int16_t temp = 0;
+		//ow_ds18X20_read_temperature(ids, &temp);
+		//kprintf("Temp[%d]\n", temp);
+
 		timer_delay(500);
 	}
 
