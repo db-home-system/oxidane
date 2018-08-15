@@ -98,7 +98,7 @@ int ow_reset(void);
 bool ow_busy(void);
 
 uint8_t ow_bit_io(uint8_t b);
-uint8_t ow_byte_wr(uint8_t b);
+void ow_byte_wr(uint8_t b);
 uint8_t ow_byte_rd(void);
 
 uint8_t ow_rom_search(uint8_t diff, uint8_t * id);

@@ -66,21 +66,17 @@ static void init(void)
 int main(void)
 {
 	init();
-	ow_ds18x20_resolution(ids, 12);
+	kprintf("Reset[%d]\n", ow_reset());
 
 	while (1)
 	{
-		kprintf("Reset[%d]\n", ow_reset());
+		kprintf("ROM[ ");
+		ow_byte_wr(0x33);
+		for (int i = 0; i < 8; i++)
+			kprintf("%02x ", ow_byte_rd());
+		kprintf(" ]\n");
 
-		//ow_ds18X20_start(ids, false);
-		//while(ow_busy())
-		//	cpu_relax();
-
-		//int16_t temp = 0;
-		//ow_ds18X20_read_temperature(ids, &temp);
-		//kprintf("Temp[%d]\n", temp);
-
-		timer_delay(500);
+		timer_delay(1000);
 	}
 
 	return 0;

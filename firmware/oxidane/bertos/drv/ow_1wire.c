@@ -62,15 +62,6 @@ int ow_reset(void)
 	return ret;
 }
 
-/**
-* Check for 1-wire bus being busy
-*
-* \return true if busy, false if not
-*/
-bool ow_busy(void)
-{
-	return ow_bit_write(1) ? false : true;
-}
 
 /**
  * Function to output a bit
@@ -78,14 +69,18 @@ bool ow_busy(void)
  * \param b bit to output
  * \return bit read from I/O
  */
-static void ow_bit_write(uint8_t b)
+static void ow_bit_write(bool b)
 {
-	if (b & BV(0)) {
+	kprintf("%d ", b);
+	if (b)
+	{
 		OW_HW_PIN_ACTIVE();
 		timer_udelay(10);
 		OW_HW_PIN_INACTIVE();
 		timer_udelay(55);
-	} else {
+	}
+	else
+	{
 		OW_HW_PIN_ACTIVE();
 		timer_udelay(65);
 		OW_HW_PIN_INACTIVE();
@@ -109,22 +104,31 @@ static uint8_t ow_bit_read(void)
 }
 
 /**
+* Check for 1-wire bus being busy
+*
+* \return true if busy, false if not
+*/
+bool ow_busy(void)
+{
+	return ow_bit_read();
+}
+
+/**
  * Function to output a byte
  *
  * \param b byte to output
  * \return byte read from I/O
  */
-uint8_t ow_byte_wr(uint8_t b)
+void ow_byte_wr(uint8_t b)
 {
-	uint8_t i = 8, j;
-	do
-	{
-		ow_bit_write(b & BV(0));
-		b >>= 1;
-	}
-	while (--i);
+	kputs("byte: ");
+	int i = 7;
+	do {
+		ow_bit_write((bool)(b & BV(i)));
+		i--;
+	} while(i >= 0);
 
-	return b;
+	kputs("::::\n");
 }
 
 /**
@@ -135,26 +139,6 @@ uint8_t ow_byte_wr(uint8_t b)
  */
 uint8_t ow_byte_wr_with_parasite_enable(uint8_t b)
 {
-	uint8_t i = 8, j;
-
-	do
-	{
-		if (i != 1)
-		{
-			j = ow_bit_write_intern(b & 1, 0);
-		}
-		else
-		{
-			j = ow_bit_write_intern(b & 1, 1);
-		}
-		b >>= 1;
-		if (j)
-		{
-			b |= 0x80;
-		}
-	}
-	while (--i);
-
 	return b;
 }
 
@@ -237,14 +221,12 @@ uint8_t ow_rom_search(uint8_t diff, uint8_t * id)
 				*id |= 0x80;
 			}
 			i--;
-		}
-		while (--j);
+		} while (--j);
 
 		// next byte of ID
 		id++;
 
-	}
-	while (i);
+	} while (i);
 
 	// to continue search
 	return next_diff;
@@ -323,10 +305,5 @@ void ow_command_with_parasite_enable(uint8_t command, uint8_t * id)
  */
 void ow_block(uint8_t * buff, uint8_t len)
 {
-	uint8_t i;
-
-	for (i = 0; i < len; i++)
-		buff[i] = ow_byte_wr(buff[i]);
-
 }
 

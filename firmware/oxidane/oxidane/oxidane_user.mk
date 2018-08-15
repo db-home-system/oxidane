@@ -42,4 +42,5 @@ oxidane_USER_CPPAFLAGS = \
 oxidane_USER_CPPFLAGS = \
 	-fno-strict-aliasing \
 	-fwrapv \
+	-Os \
 	#

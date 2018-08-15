@@ -9,7 +9,7 @@ oxidane_DEBUG = 1
 # Our target application
 TRG += oxidane
 
-oxidane_PREFIX = "/usr/local/toolchain/gcc-arm-none-eabi-7-2018-q2-update/bin/arm-none-eabi-"
+oxidane_PREFIX = "arm-none-eabi-"
 
 oxidane_SUFFIX = ""
 
