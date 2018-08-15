@@ -48,7 +48,7 @@ int ow_reset(void)
 	do {
 		if (timer_clock() - start > ms_to_ticks(100))
 			return OW_BUS_ERR;
-	} while (ow_hw_pin_status());
+	} while (!ow_hw_pin_status());
 
 	OW_HW_PIN_ACTIVE();
 	timer_udelay(480);
@@ -69,7 +69,7 @@ int ow_reset(void)
 */
 bool ow_busy(void)
 {
-	return ow_bit_io(1) ? false : true;
+	return ow_bit_write(1) ? false : true;
 }
 
 /**
@@ -78,9 +78,34 @@ bool ow_busy(void)
  * \param b bit to output
  * \return bit read from I/O
  */
-uint8_t ow_bit_io(uint8_t b)
+static void ow_bit_write(uint8_t b)
 {
-	return ow_bit_io_intern(b & 1, 0);
+	if (b & BV(0)) {
+		OW_HW_PIN_ACTIVE();
+		timer_udelay(10);
+		OW_HW_PIN_INACTIVE();
+		timer_udelay(55);
+	} else {
+		OW_HW_PIN_ACTIVE();
+		timer_udelay(65);
+		OW_HW_PIN_INACTIVE();
+		timer_udelay(5);
+	}
+}
+
+static uint8_t ow_bit_read(void)
+{
+	uint8_t b = 0;
+
+	OW_HW_PIN_ACTIVE();
+	timer_udelay(1);
+	OW_HW_PIN_INACTIVE();
+	ow_hw_pin_status();
+	timer_udelay(14);
+	b = ow_hw_pin_status();
+	timer_udelay(45);
+
+	return b;
 }
 
 /**
@@ -92,15 +117,10 @@ uint8_t ow_bit_io(uint8_t b)
 uint8_t ow_byte_wr(uint8_t b)
 {
 	uint8_t i = 8, j;
-
 	do
 	{
-		j = ow_bit_io(b & 1);
+		ow_bit_write(b & BV(0));
 		b >>= 1;
-		if (j)
-		{
-			b |= 0x80;
-		}
 	}
 	while (--i);
 
@@ -121,11 +141,11 @@ uint8_t ow_byte_wr_with_parasite_enable(uint8_t b)
 	{
 		if (i != 1)
 		{
-			j = ow_bit_io_intern(b & 1, 0);
+			j = ow_bit_write_intern(b & 1, 0);
 		}
 		else
 		{
-			j = ow_bit_io_intern(b & 1, 1);
+			j = ow_bit_write_intern(b & 1, 1);
 		}
 		b >>= 1;
 		if (j)
@@ -146,9 +166,11 @@ uint8_t ow_byte_wr_with_parasite_enable(uint8_t b)
  */
 uint8_t ow_byte_rd(void)
 {
-	// read by sending only "1"s, so bus gets released
-	// after the init low-pulse in every slot
-	return ow_byte_wr(0xFF);
+	uint8_t byte = 0;
+	for (int i = 0; i < 8; i++)
+		byte |= ow_bit_read() << i;
+
+	return byte;
 }
 
 
@@ -184,8 +206,8 @@ uint8_t ow_rom_search(uint8_t diff, uint8_t * id)
 		do
 		{
 			// read bit
-			b = ow_bit_io(1);
-			if (ow_bit_io(1))
+			b = ow_bit_read();
+			if (ow_bit_read())
 			{
 				// read complement bit
 				if (b)
@@ -207,7 +229,7 @@ uint8_t ow_rom_search(uint8_t diff, uint8_t * id)
 				}
 			}
 			// write bit
-			ow_bit_io(b);
+			ow_bit_write(b);
 			*id >>= 1;
 			if (b)
 			{

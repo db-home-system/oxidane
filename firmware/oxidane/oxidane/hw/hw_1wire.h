@@ -112,31 +112,6 @@ INLINE bool ow_hw_pin_status(void)
 #define OW_HW_PARASITE_ENABLE()
 #define OW_HW_PARASITE_DISABLE()
 
-/**
- * Function to output a bit
- *
- * \param b bit to output
- * \param with_parasite_enable flag to indicate leave the data line active high
- * \return bit read from I/O
- */
-INLINE uint8_t ow_bit_io_intern(uint8_t b, uint8_t with_parasite_enable)
-{
-	(void)with_parasite_enable;
-	if (b) {
-		OW_HW_PIN_ACTIVE();
-		timer_udelay(10);
-		OW_HW_PIN_INACTIVE();
-		timer_udelay(55);
-	} else {
-		OW_HW_PIN_ACTIVE();
-		timer_udelay(65);
-		OW_HW_PIN_INACTIVE();
-		timer_udelay(5);
-	}
-
-	return 0;
-}
-
 
 /**
  * Init One Wire pin port
@@ -154,3 +129,4 @@ INLINE uint8_t ow_bit_io_intern(uint8_t b, uint8_t with_parasite_enable)
 /** \} */ //addtogroup ow_driver
 
 #endif
+
